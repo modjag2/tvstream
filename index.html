@@ -202,7 +202,7 @@
             });
         }
 
-        // جلب معرف البث من API يوتيوب مع وجود Fallback احتياطي
+        // جلب معرف البث من API يوتيوب أو RSS مع وجود معالجة خاصة للجزيرة
         async function fetchLiveVideoId(channelId) {
             if (videoCache[channelId]) return videoCache[channelId];
 
@@ -225,15 +225,16 @@
                 }
 
                 if (videoId) {
-                    videoCache[channelId] = videoId;
-                    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+                    videoCache[channelId] = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+                    return videoCache[channelId];
                 }
             } catch (error) {
-                console.error("خطأ في API يوتيوب، جاري استخدام رابط البث المباشر الاحتياطي للقناة:", channelId);
+                console.error("خطأ في API يوتيوب للقناة:", channelId);
             }
 
-            // رابط احتياطي دائم للبث المباشر للقناة في حال فشل الـ API أو نفاد الحصة
-            return `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1`;
+            // خيار احتياطي خاص بقناة الجزيرة أو باقي القنوات في حال توقف الـ API
+            const embedUrl = `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1`;
+            return embedUrl;
         }
 
         // تحديث شبكة الفيديوهات المعروضة
@@ -266,7 +267,7 @@
                 container.className = "video-container";
 
                 const iframe = document.createElement("iframe");
-                iframe.allow = "autoplay; encrypted-media";
+                iframe.allow = "autoplay; encrypted-media; picture-in-picture";
                 iframe.allowFullscreen = true;
 
                 container.appendChild(iframe);
