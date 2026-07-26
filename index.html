@@ -34,23 +34,46 @@
 
         /* شريط علوي رفيع وثابت */
         .top-bar {
-            height: 35px; /* شريط رفيع جداً */
+            height: 38px; /* شريط رفيع مناسب للخيارات */
             background-color: #111;
             border-bottom: 1px solid #222;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 12px;
+            padding: 0 10px;
             z-index: 9999;
             flex-shrink: 0;
             transition: opacity 0.4s ease, margin-top 0.4s ease;
+            gap: 10px;
         }
 
-        /* عنوان الصفحة في الشريط */
-        .page-title {
-            color: #ddd;
-            font-size: 13px;
-            font-weight: 500;
+        /* القنوات في الشريط العلوي */
+        .channels-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none; /* إخفاء شريط التمرير */
+        }
+        
+        .channels-selector::-webkit-scrollbar {
+            display: none;
+        }
+
+        .channel-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #ccc;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .channel-option input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: #ff0000;
         }
 
         /* زر ملء الشاشة */
@@ -63,7 +86,8 @@
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
-            transition: background-color 0.2s, transform 0.1s;
+            flex-shrink: 0;
+            transition: background-color 0.2s;
         }
 
         .fullscreen-btn:hover {
@@ -72,7 +96,7 @@
 
         /* حالة إخفاء الشريط فقط أثناء وضع ملء الشاشة */
         .top-bar.fullscreen-hidden {
-            margin-top: -35px; /* يسحب الشريط للأعلى ليختفي تماماً */
+            margin-top: -38px; /* يسحب الشريط للأعلى ليختفي تماماً */
             opacity: 0;
             pointer-events: none;
         }
@@ -81,10 +105,12 @@
         .video-wall {
             flex-grow: 1;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
             width: 100%;
-            height: calc(100vh - 35px);
+            height: calc(100vh - 38px);
+            gap: 2px;
+            background-color: #000;
         }
 
         /* عند ملء الشاشة تغطي الفيديوهات المساحة كاملة */
@@ -98,7 +124,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #000;
+            background-color: #111;
         }
 
         .video-container iframe {
@@ -117,56 +143,70 @@
     <div class="main-wrapper">
         <!-- الشريط الرفيع العلوي -->
         <div class="top-bar" id="topBar">
-            <div class="page-title">البث المباشر للقنوات العربية</div>
+            <div class="channels-selector" id="channelsSelector">
+                <!-- سيتم توليد القنوات والـ Checkboxes هنا تلقائياً -->
+            </div>
             <button class="fullscreen-btn" onclick="toggleFullScreen(event)">ملء الشاشة ⛶</button>
         </div>
 
         <!-- جدار الفيديوهات (تحت الشريط) -->
-        <div class="video-wall">
-            <div class="video-container">
-                <iframe id="stream1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div class="video-container">
-                <iframe id="stream2" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div class="video-container">
-                <iframe id="stream3" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
-
-            <div class="video-container">
-                <iframe id="stream4" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-            </div>
+        <div class="video-wall" id="videoWall">
+            <!-- سيتم توليد إطارات الفيديوهات المختارة فقط هنا -->
         </div>
     </div>
 
     <script>
-        // إعدادات الـ API والقنوات
+        // مفتاح الـ API
         const API_KEY = "AIzaSyBq_8zwgboE1u6Q4BXz--yU86-9Kqc-3Vo";
 
-        const channels = [
-            { iframeId: "stream1", channelId: "UCH4UNKBHSNwstan99YDoCVg" }, // قناة الغد
-            { iframeId: "stream2", channelId: "UClm30t2F4FHzzkN9Irtr-8A" }, // قناة الإخبارية السورية
-            { iframeId: "stream3", channelId: "UC0jiFAzTgl17k7awGbuoYew" }, // قناة المملكة
-            { iframeId: "stream4", channelId: "UCJsZ22yL1IW0R2u0jnnyYog" }  // قناة سوريا
+        // قائمة القنوات المتاحة
+        const channelList = [
+            { id: "alghad", name: "الغد", channelId: "UCH4UNKBHSNwstan99YDoCVg", defaultChecked: true },
+            { id: "syria_news", name: "الإخبارية السورية", channelId: "UClm30t2F4FHzzkN9Irtr-8A", defaultChecked: true },
+            { id: "alhadath", name: "الحدث", channelId: "UCYcogyJ0RBPHvfw3X-5L0bQ", defaultChecked: true },
+            { id: "syria_tv", name: "تلفزيون سوريا", channelId: "UCJsZ22yL1IW0R2u0jnnyYog", defaultChecked: true },
+            { id: "alarabiya", name: "العربية", channelId: "UCrj5BGAhtWxDfqbza9T9hqA", defaultChecked: false },
+            { id: "ekhbariya_sa", name: "الإخبارية السعودية", channelId: "UCV01ajGl6nt09h40iDoHDNg", defaultChecked: false }
         ];
 
-        // دالة لجلب معرف الفيديو المباشر القناة وإدراجه في הـ iframe
-        async function fetchLiveStream(iframeId, channelId) {
-            // المحاولة الأولى: البحث عن بث مباشر شغّال حالياً
+        // تخزين روابط البث المجلوبة لتفادي تكرار طلبات הـ API
+        const videoCache = {};
+
+        // بناء قائمة القنوات في الشريط العلوي
+        function initChannelsMenu() {
+            const container = document.getElementById("channelsSelector");
+            container.innerHTML = "";
+
+            channelList.forEach(ch => {
+                const label = document.createElement("label");
+                label.className = "channel-option";
+                
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = ch.defaultChecked;
+                checkbox.value = ch.id;
+                checkbox.onchange = updateVideoWall;
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(ch.name));
+                container.appendChild(label);
+            });
+        }
+
+        // جلب معرف البث من API يوتيوب
+        async function fetchLiveVideoId(channelId) {
+            if (videoCache[channelId]) return videoCache[channelId];
+
             let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${API_KEY}`;
             
             try {
                 let response = await fetch(url);
                 let data = await response.json();
-
                 let videoId = null;
 
                 if (data.items && data.items.length > 0) {
                     videoId = data.items[0].id.videoId;
                 } else {
-                    // إذا لم يوجد بث مباشر حالياً، يجلب أحدث فيديو تم نشره بالقناة
                     let latestUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=1&key=${API_KEY}`;
                     let latestResponse = await fetch(latestUrl);
                     let latestData = await latestResponse.json();
@@ -176,17 +216,65 @@
                 }
 
                 if (videoId) {
-                    const iframe = document.getElementById(iframeId);
-                    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+                    videoCache[channelId] = videoId;
                 }
+                return videoId;
             } catch (error) {
-                console.error("خطأ في جلب البث للقناة:", channelId, error);
+                console.error("خطأ في جلب القناة:", channelId, error);
+                return null;
             }
         }
 
-        // تشغيل الجلب لجميع القنوات عند تحميل الصفحة
+        // تحديث شبكة الفيديوهات المعروضة بناءً على المربعات المحددة
+        async function updateVideoWall() {
+            const wall = document.getElementById("videoWall");
+            const checkboxes = document.querySelectorAll('#channelsSelector input[type="checkbox"]:checked');
+            const selectedChannelIds = Array.from(checkboxes).map(cb => cb.value);
+
+            const selectedChannels = channelList.filter(ch => selectedChannelIds.includes(ch.id));
+
+            // تعديل توزيع الشبكة (Grid) تلقائياً بحسب عدد القنوات
+            const count = selectedChannels.length;
+            if (count === 1) {
+                wall.style.gridTemplateColumns = "1fr";
+                wall.style.gridTemplateRows = "1fr";
+            } else if (count === 2) {
+                wall.style.gridTemplateColumns = "1fr 1fr";
+                wall.style.gridTemplateRows = "1fr";
+            } else if (count <= 4) {
+                wall.style.gridTemplateColumns = "1fr 1fr";
+                wall.style.gridTemplateRows = "1fr 1fr";
+            } else {
+                wall.style.gridTemplateColumns = "repeat(3, 1fr)";
+                wall.style.gridTemplateRows = "repeat(" + Math.ceil(count / 3) + ", 1fr)";
+            }
+
+            wall.innerHTML = "";
+
+            for (const ch of selectedChannels) {
+                const container = document.createElement("div");
+                container.className = "video-container";
+
+                const iframe = document.createElement("iframe");
+                iframe.allow = "autoplay; encrypted-media";
+                iframe.allowFullscreen = true;
+
+                container.appendChild(iframe);
+                wall.appendChild(container);
+
+                // جلب الفيديو وتضمينه
+                fetchLiveVideoId(ch.channelId).then(videoId => {
+                    if (videoId) {
+                        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+                    }
+                });
+            }
+        }
+
+        // التشغيل عند الفتح
         window.addEventListener('DOMContentLoaded', () => {
-            channels.forEach(ch => fetchLiveStream(ch.iframeId, ch.channelId));
+            initChannelsMenu();
+            updateVideoWall();
         });
 
         // --- التحكم في الشريط وملء الشاشة ---
