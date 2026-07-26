@@ -34,7 +34,7 @@
 
         /* شريط علوي رفيع وثابت */
         .top-bar {
-            height: 38px; /* شريط رفيع مناسب للخيارات */
+            height: 38px;
             background-color: #111;
             border-bottom: 1px solid #222;
             display: flex;
@@ -47,7 +47,7 @@
             gap: 10px;
         }
 
-        /* القنوات في الشريط العلوي */
+        /* القنوات في الشريط العلوي مع تأثير الـ Fade للتمرير */
         .channels-selector {
             display: flex;
             align-items: center;
@@ -55,6 +55,12 @@
             overflow-x: auto;
             white-space: nowrap;
             scrollbar-width: none; /* إخفاء شريط التمرير */
+            -webkit-overflow-scrolling: touch; /* تمرير سلس للموبايل */
+            
+            /* تأثير التلاشي التدريجي في الطرف لإظهار امتداد القنوات */
+            mask-image: linear-gradient(to left, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
+            padding-left: 15px; /* مساحة للتلاشي في جهة يسار الشريط */
         }
         
         .channels-selector::-webkit-scrollbar {
@@ -69,6 +75,7 @@
             font-size: 12px;
             cursor: pointer;
             user-select: none;
+            flex-shrink: 0; /* يمنع انكماش النص على الموبايل */
         }
 
         .channel-option input[type="checkbox"] {
@@ -96,7 +103,7 @@
 
         /* حالة إخفاء الشريط فقط أثناء وضع ملء الشاشة */
         .top-bar.fullscreen-hidden {
-            margin-top: -38px; /* يسحب الشريط للأعلى ليختفي تماماً */
+            margin-top: -38px;
             opacity: 0;
             pointer-events: none;
         }
@@ -159,7 +166,7 @@
         // مفتاح الـ API
         const API_KEY = "AIzaSyBq_8zwgboE1u6Q4BXz--yU86-9Kqc-3Vo";
 
-        // قائمة القنوات المتاحة مرتبة بالترتيب المطلوب
+        // قائمة القنوات المتاحة مرتبة
         const channelList = [
             { id: "alghad", name: "الغد", channelId: "UCH4UNKBHSNwstan99YDoCVg", defaultChecked: true },
             { id: "syria_news", name: "الإخبارية السورية", channelId: "UClm30t2F4FHzzkN9Irtr-8A", defaultChecked: true },
