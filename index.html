@@ -32,7 +32,7 @@
             cursor: none;
         }
 
-        /* شريط علوي رفيع وثابت = */
+        /* شريط علوي رفيع وثابت */
         .top-bar {
             height: 38px;
             background-color: #111;
@@ -54,13 +54,12 @@
             gap: 12px;
             overflow-x: auto;
             white-space: nowrap;
-            scrollbar-width: none; /* إخفاء شريط التمرير */
-            -webkit-overflow-scrolling: touch; /* تمرير سلس للموبايل */
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
             
-            /* تأثير التلاشي التدريجي في الطرف لإظهار امتداد القنوات */
             mask-image: linear-gradient(to left, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%);
-            padding-left: 15px; /* مساحة للتلاشي في جهة يسار الشريط */
+            padding-left: 15px;
         }
         
         .channels-selector::-webkit-scrollbar {
@@ -75,7 +74,7 @@
             font-size: 12px;
             cursor: pointer;
             user-select: none;
-            flex-shrink: 0; /* يمنع انكماش النص على الموبايل */
+            flex-shrink: 0;
         }
 
         .channel-option input[type="checkbox"] {
@@ -203,7 +202,7 @@
             });
         }
 
-        // جلب معرف البث من API يوتيوب
+        // جلب معرف البث من API يوتيوب مع وجود Fallback احتياطي
         async function fetchLiveVideoId(channelId) {
             if (videoCache[channelId]) return videoCache[channelId];
 
@@ -227,15 +226,17 @@
 
                 if (videoId) {
                     videoCache[channelId] = videoId;
+                    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
                 }
-                return videoId;
             } catch (error) {
-                console.error("خطأ في جلب القناة:", channelId, error);
-                return null;
+                console.error("خطأ في API يوتيوب، جاري استخدام رابط البث المباشر الاحتياطي للقناة:", channelId);
             }
+
+            // رابط احتياطي دائم للبث المباشر للقناة في حال فشل الـ API أو نفاد الحصة
+            return `https://www.youtube.com/embed/live_stream?channel=${channelId}&autoplay=1&mute=1`;
         }
 
-        // تحديث شبكة الفيديوهات المعروضة بناءً على المربعات المحددة
+        // تحديث شبكة الفيديوهات المعروضة
         async function updateVideoWall() {
             const wall = document.getElementById("videoWall");
             const checkboxes = document.querySelectorAll('#channelsSelector input[type="checkbox"]:checked');
@@ -243,7 +244,6 @@
 
             const selectedChannels = channelList.filter(ch => selectedChannelIds.includes(ch.id));
 
-            // تعديل توزيع الشبكة (Grid) تلقائياً بحسب عدد القنوات
             const count = selectedChannels.length;
             if (count === 1) {
                 wall.style.gridTemplateColumns = "1fr";
@@ -272,11 +272,9 @@
                 container.appendChild(iframe);
                 wall.appendChild(container);
 
-                // جلب الفيديو وتضمينه
-                fetchLiveVideoId(ch.channelId).then(videoId => {
-                    if (videoId) {
-                        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
-                    }
+                // جلب رابط الفيديو وتضمينه
+                fetchLiveVideoId(ch.channelId).then(srcUrl => {
+                    iframe.src = srcUrl;
                 });
             }
         }
