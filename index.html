@@ -159,15 +159,17 @@
         // مفتاح الـ API
         const API_KEY = "AIzaSyBq_8zwgboE1u6Q4BXz--yU86-9Kqc-3Vo";
 
-        // قائمة القنوات المتاحة
+        // قائمة القنوات المتاحة مرتبة بالترتيب المطلوب
         const channelList = [
             { id: "alghad", name: "الغد", channelId: "UCH4UNKBHSNwstan99YDoCVg", defaultChecked: true },
             { id: "syria_news", name: "الإخبارية السورية", channelId: "UClm30t2F4FHzzkN9Irtr-8A", defaultChecked: true },
             { id: "al_mamlaka", name: "المملكة", channelId: "UC0jiFAzTgl17k7awGbuoYew", defaultChecked: true },
             { id: "syria_tv", name: "تلفزيون سوريا", channelId: "UCJsZ22yL1IW0R2u0jnnyYog", defaultChecked: true },
+            { id: "aljazeera", name: "الجزيرة", channelId: "UCfiwzLy-8yKzIbsmZTzxDgw", defaultChecked: false },
+            { id: "alarabiya", name: "العربية", channelId: "UCahpxixMCwoANAftn6IxkTg", defaultChecked: false },
             { id: "alhadath", name: "الحدث", channelId: "UCrj5BGAhtWxDfqbza9T9hqA", defaultChecked: false },
-            { id: "alarabiya", name: "العربية", channelId: "UCrj5BGAhtWxDfqbza9T9hqA", defaultChecked: false },
-            { id: "ekhbariya_sa", name: "الإخبارية السعودية", channelId: "UCV01ajGl6nt09h40iDoHDNg", defaultChecked: false }
+            { id: "ekhbariya_sa", name: "الإخبارية السعودية", channelId: "UCV01ajGl6nt09h40iDoHDNg", defaultChecked: false },
+            { id: "shams", name: "شمس", channelId: "UCO9kL7zKW0xINGqcX8yXOZw", defaultChecked: false }
         ];
 
         // تخزين روابط البث المجلوبة لتفادي تكرار طلبات الـ API
