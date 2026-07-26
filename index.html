@@ -1,72 +1,33 @@
-```html
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-}
-
-.wall{
-    width:100vw;
-    height:100vh;
-    display:grid;
-    grid-template-columns:50% 50%;
-    grid-template-rows:50% 50%;
-}
-
-.wall iframe{
-    width:100%;
-    height:100%;
-    border:0;
-    display:block;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="wall">
-
-<iframe
-src="https://www.youtube.com/embed/9pNfCPji3u0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
-allow="autoplay; encrypted-media"
-allowfullscreen>
-</iframe>
-
-<iframe
-src="https://www.youtube.com/embed/hSPKVHO1Y-w?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
-allow="autoplay; encrypted-media"
-allowfullscreen>
-</iframe>
-
-<iframe
-src="https://www.youtube.com/embed/b8oTksd5mV0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
-allow="autoplay; encrypted-media"
-allowfullscreen>
-</iframe>
-
-<iframe
-src="https://www.youtube.com/embed/h6cB5IUmVF0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0"
-allow="autoplay; encrypted-media"
-allowfullscreen>
-</iframe>
-
+<!DOCTYPE html><html lang="ar"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>News Wall</title><style>
+html,body{margin:0;height:100%;overflow:hidden;background:#000;font-family:Arial}
+#wall{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100vw;height:100vh}
+.cell{position:relative;overflow:hidden;background:#000}
+.cell iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.live{position:absolute;top:8px;left:8px;color:#fff;background:#c00;padding:4px 8px;border-radius:4px;font:700 12px Arial;z-index:3}
+.clock{position:fixed;top:8px;right:8px;color:#fff;background:rgba(0,0,0,.5);padding:6px 10px;border-radius:4px;z-index:10}
+.full{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:99}
+.hidden{display:none}
+</style></head><body>
+<div class="clock" id="clock"></div>
+<div id="wall">
+<div class="cell"><div class="live">LIVE</div><iframe src="https://www.youtube.com/embed/9pNfCPji3u0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0" allow="autoplay;encrypted-media"></iframe></div>
+<div class="cell"><div class="live">LIVE</div><iframe src="https://www.youtube.com/embed/hSPKVHO1Y-w?autoplay=1&mute=1&playsinline=1&controls=0&rel=0" allow="autoplay;encrypted-media"></iframe></div>
+<div class="cell"><div class="live">LIVE</div><iframe src="https://www.youtube.com/embed/b8oTksd5mV0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0" allow="autoplay;encrypted-media"></iframe></div>
+<div class="cell"><div class="live">LIVE</div><iframe src="https://www.youtube.com/embed/h6cB5IUmVF0?autoplay=1&mute=1&playsinline=1&controls=0&rel=0" allow="autoplay;encrypted-media"></iframe></div>
 </div>
-
-</body>
-</html>
-```
+<script>
+const cells=[...document.querySelectorAll('.cell')];
+let full=-1;
+function setClock(){clock.textContent=new Date().toLocaleTimeString('ar-EG')}
+setClock();setInterval(setClock,1000);
+function toggle(i){
+ if(full===i){cells.forEach(c=>{c.classList.remove('full','hidden')});full=-1;return;}
+ cells.forEach((c,idx)=>{c.classList.toggle('hidden',idx!==i);c.classList.toggle('full',idx===i)});full=i;
+}
+cells.forEach((c,i)=>c.ondblclick=()=>toggle(i));
+document.onkeydown=e=>{
+ if(['1','2','3','4'].includes(e.key))toggle(parseInt(e.key)-1);
+ if(e.key==='Escape')toggle(full);
+ if((e.key==='f'||e.key==='F')&&!document.fullscreenElement)document.documentElement.requestFullscreen();
+};
+</script></body></html>
