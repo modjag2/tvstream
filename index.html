@@ -150,7 +150,14 @@
                 document.body.classList.add('hide-cursor');
             }, 3000);
         }
-
+       
+        // تكبير الشاشة عند أول نقرة في أي مكان بالصفحة
+        window.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        }, { once: true }); // تنفذ لمرة واحدة فقط عند أول نقرة
+       
         // الاستماع لحركة الماوس
         window.addEventListener('mousemove', showTopBar);
         window.addEventListener('click', showTopBar);
