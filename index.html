@@ -19,47 +19,76 @@
             font-family: system-ui, -apple-system, sans-serif;
         }
 
-        /* إخفاء مؤشر الماوس تلقائياً عند ثباته */
+        /* حاوية الصفحة الكاملة مرتبة عمودياً */
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* إخفاء مؤشر الماوس فقط أثناء التكبير وثبات الحركة */
         body.hide-cursor {
             cursor: none;
         }
 
-        /* زر ملء الشاشة فقط بدون شريط */
-        .fullscreen-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
+        /* شريط علوي رفيع وثابت */
+        .top-bar {
+            height: 35px; /* شريط رفيع جداً */
+            background-color: #111;
+            border-bottom: 1px solid #222;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
             z-index: 9999;
+            flex-shrink: 0;
+            transition: opacity 0.4s ease, margin-top 0.4s ease;
+        }
+
+        /* عنوان الصفحة في الشريط */
+        .page-title {
+            color: #ddd;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* زر ملء الشاشة */
+        .fullscreen-btn {
             background-color: #ff0000;
             color: #fff;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
+            padding: 3px 10px;
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            opacity: 1;
-            transition: opacity 0.5s ease, transform 0.2s ease, background-color 0.2s ease;
+            transition: background-color 0.2s, transform 0.1s;
         }
 
         .fullscreen-btn:hover {
             background-color: #cc0000;
-            transform: scale(1.05);
         }
 
-        /* حالة إخفاء الزر */
-        .fullscreen-btn.hidden {
+        /* حالة إخفاء الشريط فقط أثناء وضع ملء الشاشة */
+        .top-bar.fullscreen-hidden {
+            margin-top: -35px; /* يسحب الشريط للأعلى ليختفي تماماً */
             opacity: 0;
             pointer-events: none;
         }
 
-        /* شبكة الفيديوهات (2x2) */
+        /* شبكة الفيديوهات تحت الشريط */
         .video-wall {
+            flex-grow: 1;
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            width: 100vw;
+            width: 100%;
+            height: calc(100vh - 35px);
+        }
+
+        /* عند ملء الشاشة تغطي الفيديوهات المساحة كاملة */
+        :fullscreen .video-wall {
             height: 100vh;
         }
 
@@ -69,6 +98,7 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background-color: #000;
         }
 
         .video-container iframe {
@@ -84,53 +114,42 @@
 </head>
 <body>
 
-    <!-- زر ملء الشاشة فقط -->
-    <button class="fullscreen-btn" id="fullscreenBtn" onclick="toggleFullScreen(event)">ملء الشاشة ⛶</button>
-
-    <!-- جدار الفيديوهات -->
-    <div class="video-wall">
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/9pNfCPji3u0?autoplay=1&mute=1&loop=1&playlist=9pNfCPji3u0" 
-                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div class="main-wrapper">
+        <!-- الشريط الرفيع العلوي -->
+        <div class="top-bar" id="topBar">
+            <div class="page-title">البث المباشر للقنوات العربية</div>
+            <button class="fullscreen-btn" onclick="toggleFullScreen(event)">ملء الشاشة ⛶</button>
         </div>
 
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/hSPKVHO1Y-w?autoplay=1&mute=1&loop=1&playlist=hSPKVHO1Y-w" 
-                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
+        <!-- جدار الفيديوهات (تحت الشريط) -->
+        <div class="video-wall">
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/9pNfCPji3u0?autoplay=1&mute=1&loop=1&playlist=9pNfCPji3u0" 
+                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
 
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/b8oTksd5mV0?autoplay=1&mute=1&loop=1&playlist=b8oTksd5mV0" 
-                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
-        </div>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/hSPKVHO1Y-w?autoplay=1&mute=1&loop=1&playlist=hSPKVHO1Y-w" 
+                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
 
-        <div class="video-container">
-            <iframe src="https://www.youtube.com/embed/h6cB5IUmVF0?autoplay=1&mute=1&loop=1&playlist=h6cB5IUmVF0" 
-                    allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/b8oTksd5mV0?autoplay=1&mute=1&loop=1&playlist=b8oTksd5mV0" 
+                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+
+            <div class="video-container">
+                <iframe src="https://www.youtube.com/embed/h6cB5IUmVF0?autoplay=1&mute=1&loop=1&playlist=h6cB5IUmVF0" 
+                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
 
     <script>
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const topBar = document.getElementById('topBar');
         let hideTimeout;
 
-        // إظهار الزر عند تحريك الماوس وإخفاؤه عند الثبات 3 ثوانٍ
-        function showControls() {
-            fullscreenBtn.classList.remove('hidden');
-            document.body.classList.remove('hide-cursor');
-
-            clearTimeout(hideTimeout);
-            
-            hideTimeout = setTimeout(() => {
-                fullscreenBtn.classList.add('hidden');
-                document.body.classList.add('hide-cursor');
-            }, 3000);
-        }
-
-        window.addEventListener('mousemove', showControls);
-        showControls();
-
-        // وظيفة التكبير والتصغير
+        // دالة التكبير والتصغير
         function toggleFullScreen(e) {
             if (e) e.stopPropagation();
 
@@ -143,15 +162,39 @@
             }
         }
 
-        // تكبير الشاشة تلقائياً عند أول كبسة في أي مكان بالصفحة
+        // تكبير الشاشة عند النقر في أي مكان لأول مرة
         function enableFirstClickFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => {});
             }
         }
-
         window.addEventListener('click', enableFirstClickFullscreen, { once: true });
-        window.addEventListener('keydown', enableFirstClickFullscreen, { once: true });
+
+        // التحكم بإخفاء وإظهار الشريط أثناء وضع ملء الشاشة فقط
+        function handleMouseMove() {
+            // إذا كنا في وضع ملء الشاشة
+            if (document.fullscreenElement) {
+                topBar.classList.remove('fullscreen-hidden');
+                document.body.classList.remove('hide-cursor');
+
+                clearTimeout(hideTimeout);
+
+                // إخفاء الشريط والماوس بعد 3 ثوانٍ من ثبات الماوس
+                hideTimeout = setTimeout(() => {
+                    topBar.classList.add('fullscreen-hidden');
+                    document.body.classList.add('hide-cursor');
+                }, 3000);
+            } else {
+                // في الوضع العادي: الشريط ثابت ومكشوف دوماً
+                clearTimeout(hideTimeout);
+                topBar.classList.remove('fullscreen-hidden');
+                document.body.classList.remove('hide-cursor');
+            }
+        }
+
+        // الاستماع للتغيير في وضع ملء الشاشة وحركة الماوس
+        window.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('fullscreenchange', handleMouseMove);
     </script>
 
 </body>
