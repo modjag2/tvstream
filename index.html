@@ -124,32 +124,75 @@
         <!-- جدار الفيديوهات (تحت الشريط) -->
         <div class="video-wall">
             <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/9pNfCPji3u0?autoplay=1&mute=1&loop=1&playlist=9pNfCPji3u0" 
-                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe id="stream1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
             <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/hSPKVHO1Y-w?autoplay=1&mute=1&loop=1&playlist=hSPKVHO1Y-w" 
-                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe id="stream2" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
             <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/b8oTksd5mV0?autoplay=1&mute=1&loop=1&playlist=b8oTksd5mV0" 
-                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe id="stream3" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
 
             <div class="video-container">
-                <iframe src="https://www.youtube.com/embed/h6cB5IUmVF0?autoplay=1&mute=1&loop=1&playlist=h6cB5IUmVF0" 
-                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                <iframe id="stream4" allow="autoplay; encrypted-media" allowfullscreen></iframe>
             </div>
         </div>
     </div>
 
     <script>
+        // إعدادات الـ API والقنوات
+        const API_KEY = "AIzaSyBq_8zwgboE1u6Q4BXz--yU86-9Kqc-3Vo";
+
+        const channels = [
+            { iframeId: "stream1", channelId: "UCH4UNKBHSNwstan99YDoCVg" }, // قناة الغد
+            { iframeId: "stream2", channelId: "UClm30t2F4FHzzkN9Irtr-8A" }, // قناة الإخبارية السورية
+            { iframeId: "stream3", channelId: "UCYcogyJ0RBPHvfw3X-5L0bQ" }, // قناة الحدث
+            { iframeId: "stream4", channelId: "UCJsZ22yL1IW0R2u0jnnyYog" }  // قناة سوريا
+        ];
+
+        // دالة لجلب معرف الفيديو المباشر القناة وإدراجه في הـ iframe
+        async function fetchLiveStream(iframeId, channelId) {
+            // المحاولة الأولى: البحث عن بث مباشر شغّال حالياً
+            let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&eventType=live&type=video&key=${API_KEY}`;
+            
+            try {
+                let response = await fetch(url);
+                let data = await response.json();
+
+                let videoId = null;
+
+                if (data.items && data.items.length > 0) {
+                    videoId = data.items[0].id.videoId;
+                } else {
+                    // إذا لم يوجد بث مباشر حالياً، يجلب أحدث فيديو تم نشره بالقناة
+                    let latestUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&order=date&type=video&maxResults=1&key=${API_KEY}`;
+                    let latestResponse = await fetch(latestUrl);
+                    let latestData = await latestResponse.json();
+                    if (latestData.items && latestData.items.length > 0) {
+                        videoId = latestData.items[0].id.videoId;
+                    }
+                }
+
+                if (videoId) {
+                    const iframe = document.getElementById(iframeId);
+                    iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
+                }
+            } catch (error) {
+                console.error("خطأ في جلب البث للقناة:", channelId, error);
+            }
+        }
+
+        // تشغيل الجلب لجميع القنوات عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            channels.forEach(ch => fetchLiveStream(ch.iframeId, ch.channelId));
+        });
+
+        // --- التحكم في الشريط وملء الشاشة ---
         const topBar = document.getElementById('topBar');
         let hideTimeout;
 
-        // دالة التكبير والتصغير
         function toggleFullScreen(e) {
             if (e) e.stopPropagation();
 
@@ -162,7 +205,6 @@
             }
         }
 
-        // تكبير الشاشة عند النقر في أي مكان لأول مرة
         function enableFirstClickFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => {});
@@ -170,29 +212,24 @@
         }
         window.addEventListener('click', enableFirstClickFullscreen, { once: true });
 
-        // التحكم بإخفاء وإظهار الشريط أثناء وضع ملء الشاشة فقط
         function handleMouseMove() {
-            // إذا كنا في وضع ملء الشاشة
             if (document.fullscreenElement) {
                 topBar.classList.remove('fullscreen-hidden');
                 document.body.classList.remove('hide-cursor');
 
                 clearTimeout(hideTimeout);
 
-                // إخفاء الشريط والماوس بعد 3 ثوانٍ من ثبات الماوس
                 hideTimeout = setTimeout(() => {
                     topBar.classList.add('fullscreen-hidden');
                     document.body.classList.add('hide-cursor');
                 }, 3000);
             } else {
-                // في الوضع العادي: الشريط ثابت ومكشوف دوماً
                 clearTimeout(hideTimeout);
                 topBar.classList.remove('fullscreen-hidden');
                 document.body.classList.remove('hide-cursor');
             }
         }
 
-        // الاستماع للتغيير في وضع ملء الشاشة وحركة الماوس
         window.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('fullscreenchange', handleMouseMove);
     </script>
